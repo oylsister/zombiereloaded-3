@@ -42,7 +42,7 @@
 
 // Comment this line to exclude version info command. Enable this if you have
 // the repository and HG installed (Mercurial or TortoiseHG).
-#define ADD_VERSION_INFO
+// #define ADD_VERSION_INFO
 
 // Header includes.
 #include "zr/log.h"
@@ -351,7 +351,6 @@ public OnClientCookiesCached(client)
     ClassOnCookiesCached(client);
     WeaponsOnCookiesCached(client);
     ZHPOnCookiesCached(client);
-    InfectOnCookiesCached(client);
 }
 
 /**

@@ -34,7 +34,6 @@ CookiesInit()
     ClassOnCookiesCreate();
     WeaponsOnCookiesCreate();
     ZHPOnCookiesCreate();
-    InfectOnCookiesCreate();
 }
 
 /**
