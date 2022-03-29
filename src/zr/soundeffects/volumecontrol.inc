@@ -25,8 +25,6 @@
  * ============================================================================
  */
 
-#include <clientprefs>
-
 #define ZVOLUME_MAX_TYPE 3
 
 #define ZVOLUME_ZOMBIE 0
@@ -39,6 +37,8 @@ char ZVolumeDesc[3][] = {"Zombie Voice Volume", "Ambient Volume", "Countdown Vol
 float g_ZVolume[ZVOLUME_MAX_TYPE][MAXPLAYERS+1];
 
 Handle g_hZVolumeCookie[ZVOLUME_MAX_TYPE] = INVALID_HANDLE;
+
+int g_iClientSelected[MAXPLAYERS+1];
 
 void ZVolumeOnPluginStart()
 {
@@ -65,8 +65,9 @@ void ZVolumeClientOnCookieCached(int client)
 
         if(!sValue[0])
         {
-            g_ZVolume[i][client] = 1.0;
-            SetClientCookie(client, g_hZVolumeCookie, 1.0);
+            g_ZVolume[i][client] = 100.0;
+            Format(sValue, sizeof(sValue), "%f", g_ZVolume[i][client]);
+            SetClientCookie(client, g_hZVolumeCookie[i], sValue);
         }
         else
         {
@@ -83,11 +84,6 @@ void ZVolumeOnClientDisconnect(int client)
     }
 }
 
-void ZVolumeSetVolume(int client, int type, float value)
-{
-    g_ZVolume[type][client] = value;
-}
-
 public Action ZVolume_MainMenu(int client, int args)
 {
     Menu menu = new Menu(ZVolumeMainMenu_Handler);
@@ -100,7 +96,7 @@ public Action ZVolume_MainMenu(int client, int args)
 
     Format(zombievolmenu, sizeof(zombievolmenu), "%t", "ZVolume Zombie Volume Choice");
     Format(ambientvolmenu, sizeof(ambientvolmenu), "%t", "ZVolmue Ambient Volume Choice");
-    Format(countdownvolmenu, sizeof(countdownvolmenu), "%t", "ZVolume Countdown Volume Choice")
+    Format(countdownvolmenu, sizeof(countdownvolmenu), "%t", "ZVolume Countdown Volume Choice");
 
     menu.SetTitle("%t", "Zvolume Main Menu");
     menu.AddItem("zombie_volume", zombievolmenu);
@@ -115,5 +111,191 @@ public Action ZVolume_MainMenu(int client, int args)
 
 public int ZVolumeMainMenu_Handler(Menu menu, MenuAction action, int client, int param)
 {
+    switch(action)
+    {
+        case MenuAction_Select:
+        {
+            char info[128];
+            menu.GetItem(param, info, sizeof(info));
+
+            if (param == 0)
+            {
+                ZVolume_ZombieVoice(client, 0);
+            }
+            else if (param == 1)
+            {
+                ZVolume_AmbientVolume(client, 0);
+            }
+            else
+            {
+                ZVolume_Countdown(client, 0);
+            }
+        }
+        case MenuAction_End:
+        {
+            delete menu;
+        }
+    }
     return 0;
+}
+
+public Action ZVolume_ZombieVoice(int client, int args)
+{
+    if(args == 0)
+    {
+        VolumeController(client, ZVOLUME_ZOMBIE);
+        return Plugin_Handled;
+    }
+
+    char sArgs[64];
+    GetCmdArg(1, sArgs, sizeof(sArgs));
+
+    if(StringToInt(sArgs) <= -1 || StringToInt(sArgs) > 100)
+    {
+        return Plugin_Handled;
+    }
+
+    SetClientVolume(client, ZVOLUME_ZOMBIE, StringToInt(sArgs));
+    return Plugin_Handled;
+}
+
+public Action ZVolume_AmbientVolume(int client, int args)
+{
+    if(args == 0)
+    {
+        VolumeController(client, ZVOLUME_AMBIENT);
+        return Plugin_Handled;
+    }
+
+    char sArgs[64];
+    GetCmdArg(1, sArgs, sizeof(sArgs));
+
+    if(StringToInt(sArgs) <= -1 || StringToInt(sArgs) > 100)
+    {
+        return Plugin_Handled;
+    }
+
+    SetClientVolume(client, ZVOLUME_AMBIENT, StringToInt(sArgs));
+    return Plugin_Handled;
+}
+
+public Action ZVolume_Countdown(int client, int args)
+{
+    if(args == 0)
+    {
+        VolumeController(client, ZVOLUME_COUNTDOWN);
+        return Plugin_Handled;
+    }
+
+    char sArgs[64];
+    GetCmdArg(1, sArgs, sizeof(sArgs));
+
+    if(StringToInt(sArgs) <= -1 || StringToInt(sArgs) > 100)
+    {
+        return Plugin_Handled;
+    }
+
+    SetClientVolume(client, ZVOLUME_COUNTDOWN, StringToInt(sArgs));
+    return Plugin_Handled;
+}
+
+void VolumeController(int client, int type)
+{
+    Menu menu = new Menu(VolumeControl_Handler);
+
+    SetGlobalTransTarget(client);
+
+    char sTitle[256];
+
+    g_iClientSelected[client] = type;
+
+    switch (type)
+    {
+        case ZVOLUME_ZOMBIE:
+        {
+            Format(sTitle, sizeof(sTitle), "%t \n%t", "Zombie Volume Menu Title", "Current Volume", RoundToNearest(g_ZVolume[ZVOLUME_ZOMBIE][client]));
+        }
+        case ZVOLUME_AMBIENT:
+        {
+            Format(sTitle, sizeof(sTitle), "%t \n%t", "Ambient Volume Menu Title", "Current Volume", RoundToNearest(g_ZVolume[ZVOLUME_AMBIENT][client]));
+        }
+        case ZVOLUME_COUNTDOWN:
+        {
+            Format(sTitle, sizeof(sTitle), "%t \n%t", "Countdown Volume Menu Title", "Current Volume", RoundToNearest(g_ZVolume[ZVOLUME_COUNTDOWN][client]));
+        }
+    }
+
+    menu.SetTitle(sTitle);
+    menu.AddItem("100", "100%");
+    menu.AddItem("80", "80%");
+    menu.AddItem("60", "60%");
+    menu.AddItem("40", "40%");
+    menu.AddItem("20", "20%");
+    menu.AddItem("0", "0%");
+
+    menu.ExitBackButton = true;
+    menu.ExitButton = true;
+    menu.Display(client, MENU_TIME_FOREVER);
+}
+
+public int VolumeControl_Handler(Menu menu, MenuAction action, int client, int param)
+{
+    switch (action)
+    {
+        case MenuAction_Select:
+        {
+            char info[128];
+            menu.GetItem(param, info, sizeof(info));
+            int Volume = StringToInt(info);
+            SetClientVolume(client, g_iClientSelected[client], Volume);
+        }
+        case MenuAction_End:
+        {
+            delete menu;
+        }
+    }
+    return 0;
+}
+
+void SetClientVolume(int client, int type, int iVolume)
+{
+    if(iVolume > 100)
+    {
+        iVolume = 100;
+    }
+
+    else if(iVolume < 0)
+    {
+        iVolume = 0;
+    }
+
+    float fVolume = float(iVolume);
+
+    switch (type)
+    {
+        case ZVOLUME_ZOMBIE:
+        {
+            g_ZVolume[ZVOLUME_ZOMBIE][client] = fVolume;
+            char sValue[64];
+            Format(sValue, sizeof(sValue), "%f", g_ZVolume[ZVOLUME_ZOMBIE][client]);
+            SetClientCookie(client, g_hZVolumeCookie[ZVOLUME_ZOMBIE], sValue);
+            TranslationPrintToChat(client, "Zombie Volume Change", iVolume);
+        }
+        case ZVOLUME_AMBIENT:
+        {
+            g_ZVolume[ZVOLUME_AMBIENT][client] = fVolume;
+            char sValue[64];
+            Format(sValue, sizeof(sValue), "%f", g_ZVolume[ZVOLUME_AMBIENT][client]);
+            SetClientCookie(client, g_hZVolumeCookie[ZVOLUME_AMBIENT], sValue);
+            TranslationPrintToChat(client, "Ambient Volume Change", iVolume);
+        }
+        case ZVOLUME_COUNTDOWN:
+        {
+            g_ZVolume[ZVOLUME_COUNTDOWN][client] = fVolume;
+            char sValue[64];
+            Format(sValue, sizeof(sValue), "%f", g_ZVolume[ZVOLUME_COUNTDOWN][client]);
+            SetClientCookie(client, g_hZVolumeCookie[ZVOLUME_COUNTDOWN], sValue);
+            TranslationPrintToChat(client, "Countdown Volume Change", iVolume);
+        }
+    }
 }

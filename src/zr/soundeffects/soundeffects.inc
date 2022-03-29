@@ -38,7 +38,6 @@
 #include "zr/soundeffects/voice"
 #include "zr/soundeffects/ambientsounds"
 #include "zr/soundeffects/zombiesounds"
-//#include "zr/soundeffects/volumecontrol"
 
 /**
  * Load sound effects data.
@@ -166,15 +165,15 @@ SEffectsOnClientHuman(client)
  * @param soundvolume   The volume of the sound (0.0 - 1.0)
  * @param client        (Optional) Client index to play sound to.
  */
-SEffectsEmitAmbientSound(const String:sound[], Float:ambientvolume = 1.0, client = -1)
+SEffectsEmitAmbientSound(const String:sound[], client = -1)
 {
     // Precache sound before playing.
     PrecacheSound(sound);
 
     if (ZRIsClientValid(client))
     {
-        // Emit ambient sound.
-        EmitSoundToClient(client, sound, SOUND_FROM_PLAYER, SOUND_AMBIENT_CHANNEL, _, _, ambientvolume);
+        if(g_ZVolume[ZVOLUME_AMBIENT][client] > 0.0)
+            EmitSoundToClient(client, sound, SOUND_FROM_PLAYER, SOUND_AMBIENT_CHANNEL, _, _, g_ZVolume[ZVOLUME_AMBIENT][client] / 100.0);
 
         // Flag client that sound is playing.
         bAmbientSoundsIsPlaying[client] = true;
@@ -189,8 +188,8 @@ SEffectsEmitAmbientSound(const String:sound[], Float:ambientvolume = 1.0, client
                 continue;
             }
 
-            // Emit ambient sound.
-            EmitSoundToClient(x, sound, SOUND_FROM_PLAYER, SNDCHAN_AUTO, _, _, ambientvolume);
+            if(g_ZVolume[ZVOLUME_AMBIENT][x] > 0.0)
+                EmitSoundToClient(x, sound, SOUND_FROM_PLAYER, SNDCHAN_AUTO, _, _, g_ZVolume[ZVOLUME_AMBIENT][x] / 100.0);
         }
     }
 }
@@ -235,5 +234,15 @@ SEffectsEmitSoundFromClient(client, const String:sound[], level = SNDLEVEL_NORMA
     PrecacheSound(sound);
 
     // Emit sound from client.
-    EmitSoundToAll(sound, client, _, level);
+    for (new x = 1; x <= MaxClients; x++)
+    {
+        // If client isn't in-game, then stop.
+        if (!IsClientInGame(x))
+        {
+            continue;
+        }
+
+        if(g_ZVolume[ZVOLUME_ZOMBIE][x] > 0.0)
+            EmitSoundToClient(x, sound, client, _, level, _, g_ZVolume[ZVOLUME_AMBIENT][x] / 100.0);
+    }
 }

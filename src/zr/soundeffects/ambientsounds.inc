@@ -166,11 +166,8 @@ AmbientSoundsOnClientSpawnPost(client)
     decl String:sound[SOUND_MAX_PATH];
     GetConVarString(g_hCvarsList[CVAR_AMBIENTSOUNDS_FILE], sound, sizeof(sound));
 
-    // Get ambient sound volume.
-    new Float:ambientvolume = GetConVarFloat(g_hCvarsList[CVAR_AMBIENTSOUNDS_VOLUME]);
-
     // Emit ambient sound.
-    SEffectsEmitAmbientSound(sound, ambientvolume, client);
+    SEffectsEmitAmbientSound(sound, client);
 
     // Flag client that sound is playing.
     bAmbientSoundsIsPlaying[client] = true;
@@ -218,14 +215,11 @@ public Action:AmbientSoundsTimer(Handle:timer)
     decl String:sound[SOUND_MAX_PATH];
     GetConVarString(g_hCvarsList[CVAR_AMBIENTSOUNDS_FILE], sound, sizeof(sound));
 
-    // Get ambient sound volume.
-    new Float:ambientvolume = GetConVarFloat(g_hCvarsList[CVAR_AMBIENTSOUNDS_VOLUME]);
-
     // Stop sound before playing again.
     SEffectsStopAmbientSound(sound);
 
     // Emit ambient sound.
-    SEffectsEmitAmbientSound(sound, ambientvolume);
+    SEffectsEmitAmbientSound(sound);
 
     // Get ambient sound length.
     new Float:ambientlength = GetConVarFloat(g_hCvarsList[CVAR_AMBIENTSOUNDS_LENGTH]);

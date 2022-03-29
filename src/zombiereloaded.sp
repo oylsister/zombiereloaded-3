@@ -81,6 +81,7 @@
 #include "zr/hitgroups"
 #include "zr/roundstart"
 #include "zr/roundend"
+#include "zr/soundeffects/volumecontrol"
 #include "zr/infect"
 #include "zr/immunityhandler"
 #include "zr/damage"
@@ -213,7 +214,9 @@ public OnMapStart()
     RoundEndOnMapStart();
     SEffectsOnMapStart();
     ZSpawnOnMapStart();
+    ZVolumeOnPluginStart();
     VolInit();
+    CountDown();
 }
 
 /**
@@ -351,6 +354,7 @@ public OnClientCookiesCached(client)
     ClassOnCookiesCached(client);
     WeaponsOnCookiesCached(client);
     ZHPOnCookiesCached(client);
+    ZVolumeClientOnCookieCached(client);
 }
 
 /**
@@ -387,6 +391,7 @@ public OnClientDisconnect(client)
     VolOnPlayerDisconnect(client);
     ImmunityOnClientDisconnect(client);
     ZTele_OnClientDisconnect(client);
+    ZVolumeOnClientDisconnect(client);
 }
 
 /**
