@@ -155,8 +155,10 @@ public Action ZVolume_ZombieVoice(int client, int args)
         return Plugin_Handled;
     }
 
-    SetClientVolume(client, ZVOLUME_ZOMBIE, StringToInt(sArgs));
-    return Plugin_Handled;
+    int volume = StringToInt(sArgs);
+
+    SetClientVolume(client, ZVOLUME_ZOMBIE, volume);
+    return Plugin_Stop;
 }
 
 public Action ZVolume_AmbientVolume(int client, int args)
@@ -175,8 +177,10 @@ public Action ZVolume_AmbientVolume(int client, int args)
         return Plugin_Handled;
     }
 
-    SetClientVolume(client, ZVOLUME_AMBIENT, StringToInt(sArgs));
-    return Plugin_Handled;
+    int volume = StringToInt(sArgs);
+
+    SetClientVolume(client, ZVOLUME_AMBIENT, volume);
+    return Plugin_Stop;
 }
 
 public Action ZVolume_Countdown(int client, int args)
@@ -195,8 +199,10 @@ public Action ZVolume_Countdown(int client, int args)
         return Plugin_Handled;
     }
 
-    SetClientVolume(client, ZVOLUME_COUNTDOWN, StringToInt(sArgs));
-    return Plugin_Handled;
+    int volume = StringToInt(sArgs);
+
+    SetClientVolume(client, ZVOLUME_COUNTDOWN, volume);
+    return Plugin_Stop;
 }
 
 void VolumeController(int client, int type)
@@ -271,31 +277,31 @@ void SetClientVolume(int client, int type, int iVolume)
 
     float fVolume = float(iVolume);
 
-    switch (type)
+    if(type == ZVOLUME_ZOMBIE)
     {
-        case ZVOLUME_ZOMBIE:
-        {
-            g_ZVolume[ZVOLUME_ZOMBIE][client] = fVolume;
-            char sValue[64];
-            Format(sValue, sizeof(sValue), "%f", g_ZVolume[ZVOLUME_ZOMBIE][client]);
-            SetClientCookie(client, g_hZVolumeCookie[ZVOLUME_ZOMBIE], sValue);
-            TranslationPrintToChat(client, "Zombie Volume Change", iVolume);
-        }
-        case ZVOLUME_AMBIENT:
-        {
-            g_ZVolume[ZVOLUME_AMBIENT][client] = fVolume;
-            char sValue[64];
-            Format(sValue, sizeof(sValue), "%f", g_ZVolume[ZVOLUME_AMBIENT][client]);
-            SetClientCookie(client, g_hZVolumeCookie[ZVOLUME_AMBIENT], sValue);
-            TranslationPrintToChat(client, "Ambient Volume Change", iVolume);
-        }
-        case ZVOLUME_COUNTDOWN:
-        {
-            g_ZVolume[ZVOLUME_COUNTDOWN][client] = fVolume;
-            char sValue[64];
-            Format(sValue, sizeof(sValue), "%f", g_ZVolume[ZVOLUME_COUNTDOWN][client]);
-            SetClientCookie(client, g_hZVolumeCookie[ZVOLUME_COUNTDOWN], sValue);
-            TranslationPrintToChat(client, "Countdown Volume Change", iVolume);
-        }
+        g_ZVolume[ZVOLUME_ZOMBIE][client] = fVolume;
+        char sValue[64];
+        Format(sValue, sizeof(sValue), "%f", g_ZVolume[ZVOLUME_ZOMBIE][client]);
+        SetClientCookie(client, g_hZVolumeCookie[ZVOLUME_ZOMBIE], sValue);
+        TranslationPrintToChat(client, "Zombie Volume Change", iVolume);
+        return;
+    }
+    else if(type == ZVOLUME_AMBIENT)
+    {
+        g_ZVolume[ZVOLUME_AMBIENT][client] = fVolume;
+        char sValue[64];
+        Format(sValue, sizeof(sValue), "%f", g_ZVolume[ZVOLUME_AMBIENT][client]);
+        SetClientCookie(client, g_hZVolumeCookie[ZVOLUME_AMBIENT], sValue);
+        TranslationPrintToChat(client, "Ambient Volume Change", iVolume);
+        return;
+    }
+    else
+    {
+        g_ZVolume[ZVOLUME_COUNTDOWN][client] = fVolume;
+        char sValue[64];
+        Format(sValue, sizeof(sValue), "%f", g_ZVolume[ZVOLUME_COUNTDOWN][client]);
+        SetClientCookie(client, g_hZVolumeCookie[ZVOLUME_COUNTDOWN], sValue);
+        TranslationPrintToChat(client, "Countdown Volume Change", iVolume);
+        return;
     }
 }
