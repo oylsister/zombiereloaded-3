@@ -1208,4 +1208,22 @@
 		"#format"	"{1:d}"
 		"en"		"Current Volume: {1}"
 	}
+
+    "Zombie Volume Change"
+    {
+        "#format"   "{1:d}"
+        "en"        "You have set Zombie Voice Volume to @lgreen{1}"
+    }
+
+    "Ambient Volume Change"
+    {
+        "#format"   "{1:d}"
+        "en"        "You have set Ambient Volume to @lgreen{1}"
+    }
+
+    "Countdown Volume Change"
+    {
+        "#format"   "{1:d}"
+        "en"        "You have set Countdown Volume to @lgreen{1}"
+    }
 }
