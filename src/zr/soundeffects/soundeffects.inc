@@ -243,6 +243,6 @@ SEffectsEmitSoundFromClient(client, const String:sound[], level = SNDLEVEL_NORMA
         }
 
         if(g_ZVolume[ZVOLUME_ZOMBIE][x] > 0.0)
-            EmitSoundToClient(x, sound, client, _, level, _, g_ZVolume[ZVOLUME_AMBIENT][x] / 100.0);
+            EmitSoundToClient(x, sound, client, _, level, _, g_ZVolume[ZVOLUME_ZOMBIE][x] / 100.0);
     }
 }
