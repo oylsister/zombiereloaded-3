@@ -822,6 +822,9 @@ public Action:InfectCountdown(Handle:timer)
 
         for(int i = 1; i <= MaxClients; i++)
         {
+            if(!IsClientInGame(i))
+                continue;
+
             if(g_ZVolume[ZVOLUME_COUNTDOWN][i] > 0.0)
                 EmitSoundToClient(i, sounddir, _, _, _, _, g_ZVolume[ZVOLUME_COUNTDOWN][i] / 100.0);
         }
