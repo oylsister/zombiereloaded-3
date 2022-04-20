@@ -274,8 +274,13 @@ ZMarketCheckRebuy(client)
     }
 
     // Give default/prefered spawn weapons
-    ZMarketRebuy(client, true);
-    g_bZMarketWeaponsBought[client] = true;
+    bool zmarket = GetConVarBool(g_hCvarsList[CVAR_WEAPONS_ZMARKET]);
+
+    if(zmarket)
+    {
+        ZMarketRebuy(client, true);
+        g_bZMarketWeaponsBought[client] = true;
+    }
 }
 
 /**
